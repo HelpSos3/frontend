@@ -1,0 +1,81 @@
+.modal-anon .modal-dialog { max-width: 520px; }
+.modal-anon .modal-content { border-radius: 12px; }
+
+.modal-anon .modal-header {
+  font-family: 'Kanit', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: .056em;
+  border: none;
+  justify-content: center;
+  position: relative;
+}
+.modal-anon .close-wrap { position: absolute; right: 14px; top: 12px; }
+.modal-anon .btn-close-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid #d1d5db; background: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+
+.modal-anon .upload-wrap {
+  width: 320px;
+  margin: 0 auto 6px;
+}
+.modal-anon .upload-box {
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
+  background: #e6e6e6;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.modal-anon .upload-label {
+  position: absolute;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+  border: 1px solid #d1d5db;
+}
+.modal-anon .upload-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.modal-anon .btn-save-photo {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  color: #111;
+  font-family: 'Kanit', sans-serif;
+  border-radius: 8px;
+  padding: 6px 16px;
+}
+.modal-anon .btn-save-photo:hover { background: #f7f7f7; }
+
+.modal-anon .btn-confirm {
+  background: #0A7E07;
+  border: none;
+  color: #fff;
+  padding: 10px 32px;
+  border-radius: 24px;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 400;
+  min-width: 140px;
+}
+.modal-anon .btn-confirm:hover { background: #086906; }
+.modal-anon .btn-confirm:disabled { opacity: .7; cursor: not-allowed; }
+
+/* ปุ่ม ถ่ายใหม่ */
+.modal-anon .btn-retake{
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  color: #111;
+  font-family: 'Kanit', sans-serif;
+  border-radius: 8px;
+  padding: 6px 16px;
+}
+.modal-anon .btn-retake:hover{ background:#f7f7f7; }
+.modal-anon .btn-retake:disabled{ opacity:.6; cursor:not-allowed; }

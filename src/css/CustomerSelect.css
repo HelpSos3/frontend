@@ -1,0 +1,123 @@
+/*  Header  */
+.page-title{
+  font-family:'Kanit',sans-serif;
+  font-weight:700;
+  color:#ffffff;
+  font-size:1.8rem;
+  letter-spacing: 0.8px;
+}
+
+/* กรอบขาวหลังตาราง */
+.cs-card{
+  background:#fff;
+  border-radius:14px;
+  padding:20px 22px 16px;          
+  box-shadow:0 2px 14px rgba(0,0,0,.08);
+
+  height: 600px;                    
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;                 
+}
+
+/* โซนตารางกินพื้นที่ที่เหลือ และเลื่อนภายในได้ */
+.cs-card .table-responsive{
+  flex: 1 1 auto;
+  overflow: auto;
+  margin-bottom: 8px;               
+}
+
+/* ช่องค้นหา */
+.tools-search{ min-width:600px; }
+.tools-search .input-group{ width:100%; }
+.tools-search .form-control{
+  height:44px;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+  box-shadow:0 2px 6px rgba(0,0,0,.06);
+  font-family:'Kanit',sans-serif;
+}
+.tools-search .input-group-text{
+  height:44px; width:44px; margin-left:8px;
+  border-radius:12px; border:1px solid #e5e7eb;
+  background:#ffffff; box-shadow:0 2px 6px rgba(0,0,0,.06);
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* ตาราง */
+.cs-table thead th{
+  background:#ffffff;
+  color:#0f172a;
+  font-family:'Kanit',sans-serif;
+  font-weight: 600;
+  border-bottom:2px solid #e5e7eb;
+}
+.cs-table td, .cs-table th{ vertical-align:middle; padding:12px; }
+
+/* แถวสลับสี */
+.cs-table tbody tr.odd{  background:#ffffff; }
+.cs-table tbody tr.even{ background:#f3f5fb; }      /* เทาอมม่วงอ่อน */
+.cs-table tbody tr.cs-row{ transition: background-color .12s ease; cursor:pointer; }
+.cs-table tbody tr.cs-row:hover{ background:#e9ecf8; }
+
+/* Avatar */
+.avatar-40{
+  width:40px; height:40px; border-radius:999px; overflow:hidden;
+  background:#e5e7eb; display:inline-flex; align-items:center; justify-content:center;
+}
+.avatar-40 img{ width:100%; height:100%; object-fit:cover; }
+
+/* Address  */
+.addr{ max-width:560px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+
+.cs-footer{
+  display:flex;
+  justify-content:center;          
+  padding-top:10px;
+  margin-top:12px;
+  flex: 0 0 auto;
+}
+
+
+.cs-pager{
+  display:flex; align-items:center; justify-content:center;
+  gap:8px;                        
+  margin:6px 0 2px;
+}
+
+.pager-text{
+  background:transparent; border:0;
+  color:#9aa3ad;                   
+  font-size:12px; line-height:1;
+  padding:0 4px; cursor:pointer;
+}
+.pager-text:disabled{ opacity:.55; cursor:default; }
+
+.page-pill{
+  min-width:28px; height:28px;     
+  padding:0;
+  border-radius:8px;              
+  border:1px solid #e5e7eb;
+  background:#ececec;              
+  color:#3b3b3b;
+  font-size:12px;
+  line-height:28px;                
+  text-align:center;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  transition: background-color .12s ease, color .12s ease, border-color .12s ease;
+}
+.page-pill:hover{ background:#e6e6e6; }
+
+
+.page-pill.active{
+  background:#218150;              
+  border-color:#218150;
+  color:#ffffff;
+  box-shadow:0 2px 4px rgba(0,0,0,.08);
+}
+
+/* ความสูงทางเลือกสำหรับหน้าจอเตี้ย ๆ */
+@media (max-height: 700px){
+  .cs-card{ height: 420px; }
+}

@@ -1,0 +1,336 @@
+/* ปุ่ม เพิ่มสินค้า */
+.btn-pill {
+  font-family: 'Kanit', sans-serif;
+  border-radius: 999px;
+  padding: .5rem 1rem;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid rgba(255,255,255,.4);
+  box-shadow: 0 2px 6px rgba(0,0,0,.12);
+}
+.btn-pill:hover {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* ระยะห่างการ์ด & คอลัมน์ */
+.products-grid { gap: 18px; }
+.products-grid .col { flex: 0 0 auto; width: auto; }
+
+/* การ์ดสินค้า */
+.products-grid .card {
+  width: 180px;
+  height: 230px;
+  background: #fff;
+  border-radius: 0 !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+  transition: box-shadow .15s ease;
+}
+.products-grid .card:hover {
+  box-shadow: 0 8px 20px rgba(43, 40, 40, 0.15);
+  cursor: pointer;
+}
+
+/* รูปบนการ์ด */
+.products-grid .thumb {
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+  padding: 8px;
+  background: #fff;
+}
+
+/* เนื้อการ์ด */
+.products-grid .card-body { padding: 1rem .75rem .8rem; }
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Kanit', sans-serif;
+  margin-bottom: .25rem;
+}
+.price-small {
+  font-size: .9rem;
+  font-family: Arial, sans-serif;
+  font-style: italic;
+  color: #6b7280;
+}
+
+
+/* modal เพิ่ม/แก้ไข  */
+.modal-add .modal-dialog{ max-width: 520px; }
+.modal-add .modal-content{ border-radius: 12px; }
+
+.modal-add .modal-header{
+  font-family: 'Kanit', sans-serif;
+  font-size: 22px;
+  letter-spacing: .056em;
+  border: none;                 
+  padding-bottom: 0;
+  justify-content: center;
+  position: relative;
+}
+.modal-add .modal-header { border-bottom: 0; }  
+.modal-add .modal-title{
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: .056em;
+}
+.modal-add .close-wrap{ position: absolute; right: 14px; top: 12px; }
+.modal-add .btn-close-circle{
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid #d1d5db; background: #fff;
+  display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+}
+
+.modal-add .modal-body{ padding-top: 8px; }
+
+.modal-add .upload-wrap{
+  width: 320px;               
+  margin: 0 auto 6px;         
+}
+.modal-add .upload-box{
+  width: 100%;                
+  height: 200px;
+  border-radius: 8px;
+  background: #e6e6e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin: 0;                  
+  position: relative;
+  cursor: pointer;
+}
+.modal-add .upload-label{
+  position: absolute;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #fff;
+  color: #111;
+  font-family: Arial, sans-serif;
+  font-weight: 350;
+  border: 1px solid #d1d5db;
+}
+.modal-add .upload-img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.modal-add .upload-choose-btn{
+  position: absolute;        
+  top: 50%;                 
+  left: 50%;                 
+  transform: translate(-50%, -50%);  
+  inset:auto auto 50% 50%;
+  padding:6px 12px; 
+  border-radius:8px; 
+  background:#fff;
+  color:#111; 
+  border:1px solid #d1d5db; 
+  font-family:'Kanit',sans-serif;
+}
+.modal-add .upload-choose-btn:hover{ background:#f7f7f7; }
+
+
+.modal-add .upload-hint{
+  width: 100%;
+  margin-top: 4px;
+  text-align: left;
+  font-size: .8rem;
+  line-height: 1.1;
+  color: #6b7280;
+}
+
+.modal-add .field-label{
+  font-family: 'Kanit', sans-serif;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.modal-add .input-ctl{ border-radius: 6px; height: 38px; }
+
+.modal-add .form-select:disabled{
+  background-image: none !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: .75rem;
+}
+.modal-add .form-select:disabled::-ms-expand{ display:none; }
+
+/* เพิ่มหมวดหมู่ */
+.modal-add .addcat-link{
+  display: inline-block;
+  margin-top: 6px;
+  font-family: 'Kanit', sans-serif;
+  font-size: .9rem; font-weight: 500;
+  color: #0A7E07; background: transparent; border: 0; padding: 0; cursor: pointer;
+}
+.modal-add .addcat-link:hover{ text-decoration: underline; }
+
+.modal-add .addcat-inline{
+  margin-top: 8px; display: flex; gap: 8px; align-items: center;
+}
+.modal-add .addcat-input{
+  flex: 1; height: 36px; border-radius: 8px; border: 1px solid #d1d5db; padding: 0 .75rem;
+  font-family: 'Kanit', sans-serif;
+}
+.modal-add .btn-addcat{
+  padding: 8px 16px; border-radius: 20px; border: none; background: #0A7E07; color: #fff;
+  font-family: 'Kanit', sans-serif; font-weight: 500; white-space: nowrap;
+}
+.modal-add .btn-addcat:hover{ background: #086906; }
+.modal-add .btn-addcat:disabled{ opacity: .7; cursor: not-allowed; }
+.modal-add .btn-cancelcat{
+  padding: 8px 14px; 
+  border-radius: 20px; 
+  background: #E0686A; 
+  color: #ffffff;
+  border: 1px solid #cbd5e1; 
+  font-family: 'Kanit', sans-serif; 
+  white-space: nowrap;
+}
+.modal-add .btn-cancelcat:hover{ background: #b73535; }
+
+.modal-add .modal-footer { 
+  border-top: none; 
+  padding-top: .5rem;
+}
+
+/* ปุ่มยืนยัน  เพิ่ม/แก้ไข */
+.modal-add .submit-wrap{ 
+  display: flex; 
+  justify-content: center; 
+  margin-top: 30px; 
+}
+.modal-add .btn-confirm{
+  background:#0A7E07;
+  border:none;
+  color:#fff;
+  padding:10px 32px;
+  border-radius:24px;
+  font-family:'Kanit', sans-serif;
+  font-weight:400;
+  min-width:140px;
+
+
+  transition: background .15s ease, box-shadow .15s ease;
+}
+.modal-add .btn-confirm:hover{
+  background:#086906;
+}
+
+.modal-add .btn-confirm:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 3px rgba(10,126,7,.2);
+}
+.modal-add .btn-confirm:disabled,
+.modal-add .btn-confirm:disabled:hover{
+  opacity:.7;
+  background:#0A7E07;
+  cursor:not-allowed;
+}
+
+.modal-add .footer-actions{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  padding: 10px 0 18px;
+  border-top: 0;
+}
+
+/* ปุ่ม ลบ */
+.modal-add .btn-danger-pill{
+  background:#E0686A;
+  color:#fff;
+  border:none;
+  padding:10px 32px;
+  border-radius:24px;
+  font-family:'Kanit', sans-serif;
+  font-weight:400;
+  min-width:140px;
+}
+.modal-add .btn-danger-pill:hover{ background:#b73535; }
+.modal-add .btn-danger-pill:disabled{ opacity:.7; cursor:not-allowed; }
+
+/* ปุ่ม ยกเลิกการแก้ไข */
+.modal-add .btn-cancel-outline{
+  background:#fff;
+  color:#334155;
+  border:1px solid #cbd5e1;
+  padding:10px 20px;
+  border-radius:24px;
+  font-family:'Kanit', sans-serif;
+}
+.modal-add .btn-cancel-outline:hover{ background:#d5d8db; }
+
+.modal-add .btn-confirm,
+.modal-add .btn-danger-pill,
+.modal-add .btn-cancel-outline{
+  padding: 8px 16px;   
+  min-width: 110px;   
+  font-size: 0.95rem;  
+  border-radius: 20px; 
+}
+
+
+.tools-left{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;  
+  min-width: 0;
+}
+
+.tools-select{
+  width: 250px;
+  flex: 0 0 250px;   
+  max-width: 250px;
+}
+
+.tools-search{
+  flex: 1 1 auto;    
+  min-width: 600px;  
+}
+.tools-search .input-group{ width: 100%; }
+
+
+
+
+@media (max-width: 420px){
+  .modal-add .upload-wrap{ width: 100%; }
+  .modal-add .addcat-inline{ flex-wrap: wrap; }
+  .modal-add .btn-addcat,
+  .modal-add .btn-cancelcat{ flex: 0 0 auto; }
+}
+
+
+/* การ์ดต้องเป็น relative เพื่อวางแถบพาดกลางได้ */
+.products-grid .card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* แถบแดงพาดกลางแบบ SOLD OUT */
+.products-grid .card .overlay-strip {
+  position: absolute;
+  top: 50%;
+  left: -20%;
+  width: 140%;
+  transform: rotate(-15deg) translateY(-50%);
+  background: rgba(220, 53, 69, 0.9); /* สีแดงโปร่งนิดๆ */
+  color: #fff;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 0.35rem 0;
+  z-index: 10;
+  pointer-events: none; /* ให้คลิกทะลุได้ (ไม่บังปุ่ม/การ์ด) */
+}
+
+/* รูป */
+.products-grid .card .thumb {
+  width: 100%;
+  height: 160px;        /* ปรับตามดีไซน์คุณ */
+  object-fit: cover;
+}
