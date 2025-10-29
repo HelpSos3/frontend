@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { listCustomers, quickOpenExisting } from "../api/purchases";
 import "../css/CustomerSelect.css";
@@ -17,25 +17,29 @@ export default function CustomerSelect() {
     return `${API_BASE}${p.startsWith("/") ? "" : "/"}${p}`;
   };
 
+  // ====== state ======
   const [q, setQ] = useState("");
   const [page, setPage] = useState(1);
-  const [items, setItems] = useState([]);
-  const [totalPages, setTotalPages] = useState(0);
+  const [items, setItems] = useState([]);            
+  const [totalPages, setTotalPages] = useState(0);   
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
-  async function fetchData(params = {}) {
+  const allItemsRef = useRef(null);                  
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  const PAGE_SIZE = 20;
+
+  async function fetchPaged(pageArg = page) {
     try {
       setLoading(true);
       setErr("");
       const data = await listCustomers({
-        q,
-        page,
-        page_size: 20, // 20 แถวต่อหน้า
-        ...params,
+        page: pageArg,
+        page_size: PAGE_SIZE,
       });
       setItems(data.items || []);
-      setTotalPages(data.total_pages || 0);
+      setTotalPages(data.total_pages || 1);
     } catch (e) {
       setErr(e?.response?.data?.detail || e?.message || "โหลดรายชื่อลูกค้าไม่สำเร็จ");
     } finally {
@@ -43,12 +47,72 @@ export default function CustomerSelect() {
     }
   }
 
-  useEffect(() => { fetchData(); }, [page]); // eslint-disable-line
+  useEffect(() => {
+    if (!q) {
+      fetchPaged(page);
+    }
+    // eslint-disable-next-line
+  }, [page, q]);
 
-  const onSearch = () => { setPage(1); fetchData({ page: 1 }); };
+  async function ensureAllLoaded() {
+    if (allItemsRef.current) return; 
+    setSearchLoading(true);
+    try {
+      const first = await listCustomers({ page: 1, page_size: 100 });
+      const total = Math.max(1, first.total_pages || 1);
+      let acc = first.items || [];
+
+      for (let p = 2; p <= total; p++) {
+        const resp = await listCustomers({ page: p, page_size: 100 });
+        acc = acc.concat(resp.items || []);
+      }
+      allItemsRef.current = acc;
+    } catch (e) {
+      setErr(e?.response?.data?.detail || e?.message || "โหลดข้อมูลสำหรับค้นหาไม่สำเร็จ");
+    } finally {
+      setSearchLoading(false);
+    }
+  }
+
+  // กรองชื่อ
+  const norm = (s) =>
+    (s || "")
+      .toString()
+      .toLowerCase()
+      .trim();
+
+  const filtered = useMemo(() => {
+    if (!q || !allItemsRef.current) return [];
+    const nq = norm(q);
+    return allItemsRef.current.filter((c) => norm(c.full_name).includes(nq));
+  }, [q]);
+
+  const searchTotalPages = useMemo(() => {
+    if (!q) return 1;
+    return Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  }, [q, filtered.length]);
+
+  const searchPageItems = useMemo(() => {
+    if (!q) return [];
+    const start = (page - 1) * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  }, [q, page, filtered]);
+
+  useEffect(() => {
+    let t;
+    if (q) {
+      t = setTimeout(async () => {
+        await ensureAllLoaded();
+        setPage(1);
+      }, 250); 
+    }
+    return () => t && clearTimeout(t);
+    // eslint-disable-next-line
+  }, [q]);
+
   const onSearchKey = (e) => {
-    if (e.key === "Enter") onSearch();
     if (e.key === "Escape") setQ("");
+    if (e.key === "Enter") setPage(1);
   };
 
   async function selectCustomer(c) {
@@ -64,21 +128,21 @@ export default function CustomerSelect() {
     }
   }
 
-  
-  const totalPagesSafe = Math.max(1, totalPages);
+  const showing = q ? searchPageItems : items;
+  const isLoading = q ? searchLoading : loading;
+  const totalPagesSafe = q ? searchTotalPages : Math.max(1, totalPages);
 
-  // ปุ่มเลขหน้า
   const pageNumbers = (() => {
     const maxButtons = 3;
-    const start = Math.max(1, Math.min(page - 2, Math.max(1, totalPagesSafe - (maxButtons - 1))));
+    const start = Math.max(
+      1,
+      Math.min(page - 2, Math.max(1, totalPagesSafe - (maxButtons - 1)))
+    );
     const end = Math.min(totalPagesSafe, start + (maxButtons - 1));
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   })();
 
-  // ถ้า totalPages ลดลงแล้ว page เกิน ให้ดึงกลับเข้าช่วง
-  useEffect(() => {
-    if (page > totalPagesSafe) setPage(totalPagesSafe);
-  }, [totalPagesSafe]); // eslint-disable-line
+  const isFirstPage = page <= 1;
 
   return (
     <div className="container py-3">
@@ -97,12 +161,23 @@ export default function CustomerSelect() {
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={onSearchKey}
               />
-              <span className="input-group-text">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                     fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.156a5 5 0 1 1 0-10.001 5 5 0 0 1 0 10z" />
-                </svg>
-              </span>
+              {q ? (
+                <button
+                  className="input-group-text btn btn-light"
+                  type="button"
+                  onClick={() => setQ("")}
+                  title="ล้างคำค้น"
+                >
+                  ×
+                </button>
+              ) : (
+                <span className="input-group-text">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                       fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85zm-5.242 1.156a5 5 0 1 1 0-10.001 5 5 0 0 1 0 10z" />
+                  </svg>
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -120,16 +195,17 @@ export default function CustomerSelect() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {isLoading ? (
                 <tr><td colSpan={3} className="text-center text-muted py-4">กำลังโหลด...</td></tr>
-              ) : items.length === 0 ? (
+              ) : (showing?.length || 0) === 0 ? (
                 <tr><td colSpan={3} className="text-center text-muted py-4">ไม่พบข้อมูล</td></tr>
               ) : (
-                items.map((c, idx) => (
+                showing.map((c, idx) => (
                   <tr
                     key={c.customer_id}
                     className={`cs-row ${idx % 2 ? "even" : "odd"}`}
                     onClick={() => selectCustomer(c)}
+                    style={{ cursor: "pointer" }}
                   >
                     <td>
                       <div className="avatar-40">
@@ -148,13 +224,15 @@ export default function CustomerSelect() {
         {/* หน้าถัดไป */}
         <div className="cs-footer justify-content-center">
           <div className="cs-pager">
-            <button
-              className="pager-text"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              ก่อนหน้า
-            </button>
+            {/* หน้าแรก */}
+            {!isFirstPage && (
+              <button
+                className="pager-text"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                ก่อนหน้า
+              </button>
+            )}
 
             {pageNumbers.map((n) => (
               <button
@@ -166,10 +244,10 @@ export default function CustomerSelect() {
               </button>
             ))}
 
+            {/* ปุ่มถัดไป */}
             <button
               className="pager-text"
-              disabled={page >= totalPagesSafe}
-              onClick={() => setPage((p) => Math.min(totalPagesSafe, p + 1))}
+              onClick={() => setPage((p) => p + 1)}
             >
               ถัดไป
             </button>

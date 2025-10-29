@@ -1,72 +1,128 @@
-:root{
-  --green-900:#1B3A29; /* สีพื้นหลัง */
-  --green-800:#2E8B57; /* สีพื้นหลัง sidebar */
-  --green-700:#1f5a40; /* สีพื้นหลัง logo */
-  --green-500:#2fa36b;
-  --green-400:#38c27b;
-  --text:#ffffff;
-  --muted:#ffffff;      /* สีตัวอักษรหมวดหมู่ */
-  --active-bg:#D9D9D9;
+:root {
+  --green-900: #1B3A29; /* สีพื้นหลัง content */
+  --green-800: #2E8B57; /* สีพื้นหลัง sidebar */
+  --green-700: #1f5a40; /* สีพื้นหลัง logo bar */
+  --green-500: #2fa36b;
+  --green-400: #38c27b;
+  --text: #ffffff;
+  --muted: #ffffff;
+  --active-bg: #D9D9D9;
+
+  /* === Layout constants === */
+  --sidebar-width: 240px;   /* Sidebar คงที่ */
+  --content-min-width: 1100px; /* พื้นที่เนื้อหาคงที่ */
 }
 
-.app-shell{ min-height:100vh; }
+/* ทั้งหน้าเต็มจอ */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--green-900);
+}
 
-.sidebar{
-  width: 240px;
+/* โครงหลักของแอป */
+.app-shell {
+  display: flex;
+  height: 100dvh;        /* ใช้ 100dvh ป้องกันปัญหา scroll เกินจอ */
+  width: 100%;
+  overflow: hidden;      /* กันสกรอลล์แนวนอน */
+  background: var(--green-900);
+  align-items: stretch;  /* บังคับ sidebar และ content สูงเท่ากัน */
+}
+
+/* Sidebar */
+.sidebar {
+  flex: 0 0 var(--sidebar-width);
   background: var(--green-800);
   color: var(--text);
+  display: flex;
+  flex-direction: column;
+  height: 100%;           /* สูงเท่ากับ .app-shell */
+  overflow-y: auto;       /* ถ้าเมนูยาวให้เลื่อนในนี้แทน */
+  flex-shrink: 0;
 }
 
-.brand-strip{
+/* โลโก้ */
+.brand-strip {
   background: var(--green-700);
   color: var(--text);
 }
 
-.brand-logo{
-  width: 36px; height: 36px; border-radius: 10px;
-  display:inline-flex; align-items:center; justify-content:center;
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
 }
-.brand-logo img{ width: 35px; height: 35px; object-fit: contain; }
+
+.brand-logo img {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
 
 /* หัวข้อหมวด */
-.section-label{
-  color: #ffffff; 
-  font-size: 1.2rem;            
-  font-weight: 800;             
-  letter-spacing: .056em;        
+.section-label {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: .056em;
   font-family: 'Kanit', sans-serif;
   margin-bottom: .25rem;
 }
 
-/* ชื่อหน้าเมนู */
-.nav-item .nav-link{
+/* เมนู */
+.nav-item .nav-link {
   color: var(--text);
-  font-size: 1rem;           
-  font-weight: 400;   
-  font-family: 'Kanit', sans-serif;         
+  font-size: 1rem;
+  font-weight: 400;
+  font-family: 'Kanit', sans-serif;
   border-radius: .4rem;
   padding: .65rem .75rem;
-  display:flex; align-items:center; gap:.6rem;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  transition: background .15s ease, color .15s ease;
 }
-.nav-item .nav-link:hover{
+
+.nav-item .nav-link:hover {
   background: #258255;
-  text-decoration:none;
+  text-decoration: none;
   color: #ffffff;
 }
 
-/* สี Active */
-.nav-item .nav-link.active{
-  background: #D9D9D9;
+.nav-item .nav-link.active {
+  background: var(--active-bg);
   color: #2E8B57;
   font-weight: 600;
 }
 
-.menu-icon{
-  width: 22px; height: 22px; object-fit: contain;
+/* ไอคอน */
+.menu-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 
-.sidebar-footer{ margin-top:auto; }
+/* ด้านล่าง sidebar */
+.sidebar-footer {
+  margin-top: auto;
+}
 
-.content{ background: var(--green-900); color: #eaf9f0; }
+/* พื้นที่เนื้อหา */
+.content {
+  flex: 1 1 auto;
+  min-width: var(--content-min-width);
+  height: 100%;
+  overflow-y: auto;       /* ให้ scroll เฉพาะฝั่ง content */
+  background: var(--green-900);
+  color: #eaf9f0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 24px; /* เหมือน p-4 */
+}

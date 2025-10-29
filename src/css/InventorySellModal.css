@@ -1,0 +1,214 @@
+/* ===============================
+   Popup ขายสินค้า (InventorySellModal)
+   =============================== */
+.modal-sell { font-family: 'Kanit', sans-serif; }
+
+/* ===== Modal sizing (ให้สั้นลง) ===== */
+.sell-dialog{
+  max-width: 820px;
+  width: 100%;
+  max-height: 65vh;
+}
+
+.modal-sell .modal-content{
+  border-radius:20px;
+  border:none;
+  box-shadow:0 4px 20px rgba(0,0,0,.1);
+  background:#fff;
+
+  max-height: 65vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* ===== Header ===== */
+.modal-sell .modal-header {
+  border: none;
+  padding-top: 16px;
+  padding-bottom: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal-sell .modal-title {
+  font-weight: 700;
+  font-size: 22px;
+  color: #111;
+  text-align: center;
+  width: 100%;
+}
+.modal-sell .close-wrap {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+}
+.modal-sell .btn-close-circle{
+  width:30px; height:30px; border-radius:50%;
+  border:1px solid #d1d5db; background:#fff;
+  display:inline-flex; align-items:center; justify-content:center;
+  line-height:1; transition:.2s;
+}
+.modal-sell .btn-close-circle:hover{ background:#f3f4f6; }
+
+/* ===== Body ===== */
+.modal-sell .modal-body{
+  padding: 12px 20px;
+  flex:1 1 auto;
+  overflow:hidden;
+}
+
+/* ===== หัวข้อย่อย ===== */
+.section-title{
+  font-weight:600;
+  font-size: 17px;
+  margin: 0.6rem 0 0.25rem;  /* ลดช่องไฟให้หัวข้อชิดขึ้น */
+  color:#111827;
+}
+/* เผื่อมีการติด mt-3 จาก Bootstrap ให้บังคับให้ชิดขึ้น */
+.modal-sell .section-title.mt-3{ margin-top: 6px !important; }
+
+/* ===== กรอบเทาใหญ่ (มีสกโรลเฉพาะภายใน) ===== */
+.sell-container{
+  background:#f0f2f4;
+  border-radius:14px;
+  padding:12px;
+
+  height:auto;
+  max-height:200px;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-gutter:stable both-edges;
+}
+
+/* Scrollbar (WebKit/Chromium) */
+.sell-container::-webkit-scrollbar{ width:10px; }
+.sell-container::-webkit-scrollbar-track{ background:#e7e9ec; border-radius:10px; }
+.sell-container::-webkit-scrollbar-thumb{ background:#c4c9cf; border-radius:10px; }
+.sell-container::-webkit-scrollbar-thumb:hover{ background:#aeb4bb; }
+/* Firefox */
+.sell-container{ scrollbar-width:thin; scrollbar-color:#c4c9cf #e7e9ec; }
+
+/* ===== การ์ดสีเขียวแต่ละรายการ ===== */
+.sell-item-card{
+  background:#d8f3df;
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:12px;
+
+  display:grid;
+  grid-template-columns: 120px 1fr 140px 140px 86px;
+  column-gap:12px;
+  align-items:center;
+}
+
+.sell-item-card .cell{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.sell-item-card .cell-label{
+  font-size:.84rem; color:#4b5563; font-weight:500;
+}
+.sell-item-card .cell-value{ font-size:1rem; color:#111; }
+
+
+/* จำนวนขาย */
+.sell-item-card input[type="number"]{
+  width:100%;
+  border:1px solid #cfcfcf;
+  border-radius:10px;
+  padding:4px 6px;
+  font-size:.8rem;
+  text-align:right;
+  background:#fff;
+}
+
+/* ===== คอลัมน์ Action ให้หัวตรงกับไอคอน ===== */
+.action-cell { text-align:center; }
+.action-cell .cell-label{
+  width:100%;
+  text-align:center;
+}
+.action-cell .cell-value{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-sell .btn-delete{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:32px;
+  height:32px;
+  color:#b91c1c;
+  background:none;
+  border:none;
+  cursor:pointer;
+  transition:.15s;
+  border-radius:8px;
+}
+.modal-sell .btn-delete:hover{
+  color:#991b1b;
+  background:rgba(185,28,28,.08);
+  transform:scale(1.02);
+}
+
+/* ===== ส่วนสรุป ===== */
+.summary{
+  margin-top: 8px;           /* ลดระยะด้านบนของบล็อกสรุป */
+  margin-bottom: 4px;        /* ให้ชิดกับหัวข้อถัดไป */
+  background:#f9fafb;
+  border-radius:10px;
+  padding:10px 12px;
+}
+.summary .line{
+  display:flex; justify-content:space-between;
+  margin-bottom:4px; font-size:.94rem;
+}
+
+/* ทำให้หัวข้อ "หมายเหตุ" ชิดกับสรุปมากขึ้น */
+.summary + .section-title{ margin-top: 6px !important; }
+
+/* ===== หมายเหตุ ===== */
+.note-box{
+  width:100%;
+  border-radius:10px;
+  border:1px solid #ccc;
+  padding:8px 10px;
+  resize:none;
+  margin-top: 0;             /* กล่องติดหัวข้อมากขึ้น */
+}
+/* ถ้าใช้โครงแบบ <div class="note-box"><textarea/></div> ให้ textarea กินเต็ม */
+.note-box textarea{ width:100%; border:0; outline:none; }
+
+/* ===== Footer ===== */
+.modal-sell .modal-footer{
+  border:none;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  padding: 12px 20px 18px;
+  flex:0 0 auto;
+}
+.modal-sell .btn-sell{
+  background:#16a34a; color:#fff; border:none;
+  padding:8px 20px; border-radius:20px; font-weight:600; transition:.2s;
+}
+.modal-sell .btn-sell:hover{ background:#138f41; }
+.modal-sell .btn-cancel{
+  background:#f87171; color:#fff; border:none;
+  padding:8px 20px; border-radius:20px; font-weight:600; transition:.2s;
+}
+.modal-sell .btn-cancel:hover{ background:#ef4444; }
+
+/* ===== Responsive ===== */
+@media (max-width: 880px){
+  .sell-item-card{
+    grid-template-columns:1fr 1fr;
+    row-gap:10px;
+  }
+  .sell-container{ max-height: 42vh; }
+}

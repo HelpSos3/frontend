@@ -1,32 +1,57 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AnonymousModal from "./AnonymousModal";
-import {previewIdCard, quickOpenIdCard, getOpenPurchase, deleteOpenPurchase,} from "../api/purchases";
+import {
+  previewIdCard,
+  quickOpenIdCard,
+  getOpenPurchase,
+  deleteOpenPurchase,
+} from "../api/purchases";
 import "../css/IdentitySelect.css";
 
 import faceIcon from "../image/identityscan.png";
 import personIcon from "../image/Anonymous.png";
 import groupIcon from "../image/CustomerSelect.png";
 
+// แปลงวันที่-เวลาเป็นแบบไทย 
+const formatDateThai = (input) => {
+  if (!input) return "";
+  const d = new Date(input);
+  try {
+    const day = d.getDate().toString().padStart(2, "0");
+    const month = (d.getMonth() + 1).toString().padStart(2, "0");
+    const year = (d.getFullYear() + 543).toString().slice(-2); // แปลงเป็น พ.ศ. แล้วเอา 2 หลักท้าย
+    const hours = d.getHours().toString().padStart(2, "0");
+    const minutes = d.getMinutes().toString().padStart(2, "0");
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  } catch {
+    return "";
+  }
+};
+
 export default function IdentitySelect() {
   const navigate = useNavigate();
 
-  // --- ตรวจบิลค้าง ---
+  // ตรวจบิลค้าง 
   const [openBill, setOpenBill] = useState(null);
   const [checkingOpen, setCheckingOpen] = useState(true);
   const [deletingOpen, setDeletingOpen] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
     (async () => {
       try {
         setCheckingOpen(true);
         const data = await getOpenPurchase();
-        if (data) setOpenBill(data);
+        if (mounted && data) setOpenBill(data);
       } catch (_) {
       } finally {
-        setCheckingOpen(false);
+        mounted && setCheckingOpen(false);
       }
     })();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleGoToOpen = () => {
@@ -45,7 +70,7 @@ export default function IdentitySelect() {
     }
   };
 
-  // --- โมดอลระบุตัวตน ---
+  // Modal ระบุตัวตน 
   const [showModal, setShowModal] = useState(false);
   const [scanLoading, setScanLoading] = useState(false);
   const [scanError, setScanError] = useState("");
@@ -71,7 +96,6 @@ export default function IdentitySelect() {
 
   const canConfirm = !!(cardData.full_name || cardData.national_id);
 
-  // ดึงข้อมูลบัตรจากเครื่องอ่าน
   const handleScan = async () => {
     if (scanLoading) return;
     try {
@@ -95,7 +119,6 @@ export default function IdentitySelect() {
     }
   };
 
-  // ยืนยันเปิดบิลด้วยข้อมูลบัตรที่อ่านได้
   const handleConfirm = async () => {
     if (!canConfirm) return;
     try {
@@ -106,9 +129,7 @@ export default function IdentitySelect() {
         national_id: cardData.national_id,
         full_name: cardData.full_name || null,
         address: cardData.address || null,
-        photo_base64: cardData.photo_url
-          ? cardData.photo_url.split(",")[1]
-          : undefined, 
+        photo_base64: cardData.photo_url ? cardData.photo_url.split(",")[1] : undefined,
         on_open: "return",
         confirm_delete: false,
       });
@@ -120,17 +141,30 @@ export default function IdentitySelect() {
     }
   };
 
-  // ---โมดอลไม่ระบุตัวตน ---
+  // Modal ไม่ระบุตัวตน 
   const [showAnonymous, setShowAnonymous] = useState(false);
 
+  useEffect(() => {
+    const anyModal = !!openBill || !!showModal || !!showAnonymous;
+    if (anyModal) {
+      document.body.classList.add("modal-open");
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+    return () => document.body.classList.remove("modal-open");
+  }, [openBill, showModal, showAnonymous]);
+
   return (
-    <div className="container-fluid p-0">
-      {/* Modal แจ้งเตือนบิลค้าง */}
+    <div className="container-fluid p-0 d-flex flex-column min-vh-100">
+      {/* ==== Modal แจ้งเตือนบิลค้าง ==== */}
       {openBill && (
         <>
           <div
             className="modal fade show open-bill-modal"
             style={{ display: "block" }}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
           >
             <div className="modal-dialog modal-md modal-dialog-centered">
               <div className="modal-content rounded-4">
@@ -139,14 +173,22 @@ export default function IdentitySelect() {
                 </div>
                 <div className="modal-body">
                   <div className="open-bill-summary mb-3">
-                    <div><span className="label">เลขที่บิล:</span> {openBill.purchase_id}</div>
-                    <div><span className="label">ชื่อลูกค้า:</span> {openBill.customer_name || "ไม่ระบุ"}</div>
+                    <div>
+                      <span className="label">เลขที่บิล:</span> {openBill.purchase_id}
+                    </div>
+                    <div>
+                      <span className="label">ชื่อลูกค้า:</span>{" "}
+                      {openBill.customer_name || "ไม่ระบุ"}
+                    </div>
                     {openBill.customer_national_id && (
-                      <div><span className="label">เลขบัตร:</span> {openBill.customer_national_id}</div>
+                      <div>
+                        <span className="label">เลขบัตร:</span>{" "}
+                        {openBill.customer_national_id}
+                      </div>
                     )}
                     {openBill.updated_at && (
                       <div className="updated">
-                        อัปเดตล่าสุด: {new Date(openBill.updated_at).toLocaleString()}
+                        อัปเดตล่าสุด: {formatDateThai(openBill.updated_at)}
                       </div>
                     )}
                   </div>
@@ -154,11 +196,11 @@ export default function IdentitySelect() {
                 </div>
                 <div className="modal-footer border-0 justify-content-between open-bill-actions">
                   <div className="d-flex gap-2">
-                    <button className="btn btn-primary" onClick={handleGoToOpen}>
+                    <button className="btn btn-go text-white" onClick={handleGoToOpen}>
                       ไปยังบิล
                     </button>
                     <button
-                      className="btn btn-danger"
+                      className="btn btn-delete text-white"
                       onClick={handleDeleteOpen}
                       disabled={deletingOpen}
                     >
@@ -173,9 +215,9 @@ export default function IdentitySelect() {
         </>
       )}
 
-
-      <div className="row g-0">
-        <div className="col bg-app-green min-vh-100 d-flex flex-column">
+      {/* ==== หน้าเลือกวิธีระบุตัวตน ==== */}
+      <div className="row g-0 flex-grow-1">
+        <div className="col bg-app-green d-flex flex-column min-vh-100">
           <div className="container py-5">
             <h1 className="identity-header">กรุณาเลือกวิธียืนยันตัวตน</h1>
 
@@ -188,7 +230,12 @@ export default function IdentitySelect() {
                   disabled={!!openBill}
                 >
                   <div className="card-body text-center">
-                    <img src={faceIcon} alt="ระบุตัวตน" className="img-fluid" style={{ maxHeight: 96 }} />
+                    <img
+                      src={faceIcon}
+                      alt="ระบุตัวตน"
+                      className="img-fluid"
+                      style={{ maxHeight: 96 }}
+                    />
                     <h5 className="fw-bold mt-3 mb-0">ระบุตัวตน</h5>
                   </div>
                 </button>
@@ -202,7 +249,12 @@ export default function IdentitySelect() {
                   disabled={!!openBill}
                 >
                   <div className="card-body text-center">
-                    <img src={personIcon} alt="ไม่ระบุตัวตน" className="img-fluid" style={{ maxHeight: 96 }} />
+                    <img
+                      src={personIcon}
+                      alt="ไม่ระบุตัวตน"
+                      className="img-fluid"
+                      style={{ maxHeight: 96 }}
+                    />
                     <h5 className="fw-bold mt-3 mb-0">ไม่ระบุตัวตน</h5>
                   </div>
                 </button>
@@ -216,7 +268,12 @@ export default function IdentitySelect() {
                   disabled={!!openBill}
                 >
                   <div className="card-body text-center">
-                    <img src={groupIcon} alt="ลูกค้า" className="img-fluid" style={{ maxHeight: 96 }} />
+                    <img
+                      src={groupIcon}
+                      alt="ลูกค้า"
+                      className="img-fluid"
+                      style={{ maxHeight: 96 }}
+                    />
                     <h5 className="fw-bold mt-3 mb-0">ลูกค้า</h5>
                   </div>
                 </button>
@@ -224,38 +281,69 @@ export default function IdentitySelect() {
             </div>
 
             {checkingOpen && (
-              <p className="text-center text-muted mt-3 small">(กำลังตรวจสอบบิลค้าง...)</p>
+              <p className="text-center text-muted mt-3 small">
+                (กำลังตรวจสอบบิลค้าง…)
+              </p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Modal พรีวิวบัตร */}
+      {/* ==== Modal พรีวิวบัตร ==== */}
       {showModal && (
         <>
-          <div className="modal fade show" style={{ display: "block", background: "rgba(0,0,0,0.4)" }}>
+          <div
+            className="modal fade show"
+            style={{ display: "block", background: "rgba(0,0,0,0.4)" }}
+            role="dialog"
+            aria-modal="true"
+            tabIndex={-1}
+          >
             <div className="modal-dialog modal-lg modal-dialog-centered">
               <div className="modal-content rounded-4 identity-modal">
                 <div className="modal-header border-0 pb-0">
                   <h5 className="modal-title fw-bold mx-auto">ข้อมูลลูกค้า</h5>
-                  <button type="button" className="btn-close" aria-label="Close" onClick={closeModal} />
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Close"
+                    onClick={closeModal}
+                  />
                 </div>
 
                 <div className="modal-body pt-3">
-                  {scanError && <div className="alert alert-danger py-2">{scanError}</div>}
-                  {notice && !scanError && <div className="alert alert-info py-2">{notice}</div>}
+                  {scanError && (
+                    <div className="alert alert-danger py-2">{scanError}</div>
+                  )}
+                  {notice && !scanError && (
+                    <div className="alert alert-info py-2">{notice}</div>
+                  )}
 
                   <div className="row g-3 align-items-start">
                     <div className="col-12 col-md-8">
-                      <p><strong>เลขประจำตัวบัตรประชาชน:</strong> {cardData.national_id}</p>
-                      <p><strong>ชื่อและนามสกุล:</strong> {cardData.full_name}</p>
-                      <p><strong>ที่อยู่:</strong> {cardData.address}</p>
+                      <p>
+                        <strong>เลขประจำตัวบัตรประชาชน:</strong>{" "}
+                        {cardData.national_id}
+                      </p>
+                      <p>
+                        <strong>ชื่อและนามสกุล:</strong> {cardData.full_name}
+                      </p>
+                      <p>
+                        <strong>ที่อยู่:</strong> {cardData.address}
+                      </p>
                     </div>
 
                     <div className="col-12 col-md-4 d-flex justify-content-md-end justify-content-start">
-                      <div className="border rounded-3 bg-light d-flex align-items-center justify-content-center" style={{ width: 140, height: 140 }}>
+                      <div
+                        className="border rounded-3 bg-light d-flex align-items-center justify-content-center"
+                        style={{ width: 140, height: 140 }}
+                      >
                         {cardData.photo_url ? (
-                          <img src={cardData.photo_url} alt="รูปถ่ายลูกค้า" className="img-fluid rounded-2" />
+                          <img
+                            src={cardData.photo_url}
+                            alt="รูปถ่ายลูกค้า"
+                            className="img-fluid rounded-2"
+                          />
                         ) : (
                           <span className="text-muted">ไม่มีรูป</span>
                         )}
@@ -287,11 +375,11 @@ export default function IdentitySelect() {
               </div>
             </div>
           </div>
-          <div className="modal-backdrop fade show" onClick={closeModal}></div>
+          <div className="modal-backdrop fade show" />
         </>
       )}
 
-      {/* Modal ไม่ระบุตัวตน */}
+      {/* ==== Modal ไม่ระบุตัวตน ==== */}
       <AnonymousModal
         show={showAnonymous}
         onClose={() => setShowAnonymous(false)}
