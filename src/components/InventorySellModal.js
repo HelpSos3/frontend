@@ -9,6 +9,7 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
   const [submitting, setSubmitting] = useState(false);
   const [note, setNote] = useState("");
 
+  //โหลดข้อมูลสินค้าที่เลือก
   useEffect(() => {
     if (show) {
       setLines(
@@ -24,6 +25,7 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
     }
   }, [show, selectedItems]);
 
+  //ล็อก scroll ของหน้า เวลา modal เปิดอยู่
   useEffect(() => {
     if (show) {
       document.body.classList.add("modal-open");
@@ -31,6 +33,7 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
     }
   }, [show]);
 
+  //ตรวจสอบค่าที่กรอก
   const validate = (row) => {
     const n = Number(row.qty);
     if (isNaN(n) || n <= 0) return false;
@@ -38,6 +41,7 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
     return true;
   };
 
+  //คำนวณยอดรวม
   const totalQty = useMemo(
     () =>
       lines.reduce((sum, l) => {
@@ -46,7 +50,7 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
       }, 0),
     [lines]
   );
-
+  //เปลี่ยนค่าที่ผู้ใช้กรอก
   const handleChange = (index, field, value) => {
     setLines((prev) => {
       const next = [...prev];
@@ -54,15 +58,15 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
       return next;
     });
   };
-
+  //ลบรายการสินค้า 1 ตัว
   const handleRemove = (index) => {
     setLines((prev) => prev.filter((_, i) => i !== index));
   };
-
+  //ส่งข้อมูลขายสินค้าไป api
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
     if (submitting) return;
-
+    //เตรียมข้อมูลที่จะส่ง 
     const validLines = lines
       .filter(validate)
       .map((l) => ({
@@ -72,13 +76,13 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
       }));
 
     if (!validLines.length) {
-      setError("กรุณากรอกจำนวนขายให้ถูกต้องอย่างน้อย 1 รายการ");
+      setError("กรุณาตรวจสอบข้อมูลให้ถูกต้อง");
       return;
     }
 
     setSubmitting(true);
     setError("");
-
+    //ส่งข้อมูลจริงๆ
     try {
       const res = await sellInventory(validLines);
       if (res) {
@@ -106,7 +110,6 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
         aria-modal="true"
         tabIndex={-1}
       >
-        {/* ปรับขนาดด้วย sell-dialog */}
         <div className="modal-dialog modal-dialog-centered sell-dialog">
           <div className="modal-content modal-sell">
             <div className="modal-header">
@@ -122,11 +125,9 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
 
                 <h6 className="section-title">รายการสินค้าที่นำไปขาย</h6>
 
-                {/* กรอบเทาใหญ่ เลื่อนในตัว */}
                 <div className="sell-container">
                   {lines.map((l, i) => (
                     <div key={l.prod_id} className="sell-item-card">
-                      {/* โครง label (บน) + value (ล่าง) 5 คอลัมน์ */}
                       <div className="cell">
                         <div className="cell-label">รหัสสินค้า</div>
                         <div className="cell-value code">#{String(l.prod_id).padStart(3, "0")}</div>
@@ -210,7 +211,7 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
                 />
               </div>
 
-              {/* ✅ สลับลำดับปุ่ม: ขายสินค้า (ซ้าย) / ยกเลิก (ขวา) */}
+              {/* ปุ่มขายสินค้า/ยกเลิก */}
               <div className="modal-footer">
                 <button
                   type="submit"

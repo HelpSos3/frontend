@@ -2,13 +2,29 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Routes, Route, useParams } from "react-router-dom";
 import IdentitySelect from "../components/IdentitySelect";
 import { listProducts } from "../api/products";
-import { previewItemPhoto, commitItemWithPhoto, listPurchaseItems, getPurchaseItemsSummary } from "../api/purchaseItems";
+import {
+  previewItemPhoto,
+  commitItemWithPhoto,
+  listPurchaseItems,
+  getPurchaseItemsSummary,
+  liveItemCameraUrl,
+  fetchWeightFromScale as apiFetchWeightFromScale, // 🔧 alias กัน recursive
+} from "../api/purchaseItems";
 import { FaEdit, FaTrashAlt, FaCheck, FaTimes } from "react-icons/fa";
 
 import { payPurchase } from "../api/purchases";
+import AddItemModal from "../components/AddItemModal";
+import DeleteItemModal from "../components/DeleteItemModal";
+import PayModal from "../components/PayModal";
 import api from "../api/client";
 import "../css/purchase.css";
 import "../css/products.css";
+
+const formatPrice = (v) =>
+  Number(v || 0).toLocaleString("th-TH", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 export default function PurchasePage() {
   return (
@@ -49,7 +65,6 @@ function PurchaseMain() {
   const [deletingId, setDeletingId] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-
   // กล้องผ่าน hardware service
   const [capturing, setCapturing] = useState(false);
   const [captured, setCaptured] = useState(false);
@@ -57,6 +72,12 @@ function PurchaseMain() {
   const [photoB64, setPhotoB64] = useState("");
   const [modalErr, setModalErr] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  // 🔴 URL กล้องสด (MJPEG) — ต้องอยู่ใน component เท่านั้น
+  const liveCameraUrl = useMemo(
+    () => (modalOpen && purchaseId ? liveItemCameraUrl(purchaseId) : ""),
+    [modalOpen, purchaseId]
+  );
 
   // ====== popup ชำระเงิน ======
   const [showPayModal, setShowPayModal] = useState(false);
@@ -68,9 +89,9 @@ function PurchaseMain() {
   let confirmTimerRef = React.useRef(null);
 
   // === inline edit state (สำหรับแก้ไขราคาทันที) ===
-  const [editingId, setEditingId] = useState(null);   // purchase_item_id ที่กำลังแก้
-  const [editValue, setEditValue] = useState("");     // ราคาที่กรอกอยู่ (string)
-  const [savingId, setSavingId] = useState(null);     // โชว์สถานะกำลังบันทึก
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState("");
+  const [savingId, setSavingId] = useState(null);
 
   // โหลดสินค้า
   useEffect(() => {
@@ -90,6 +111,16 @@ function PurchaseMain() {
       mounted = false;
     };
   }, [purchaseId]);
+
+  // ===== ดึงน้ำหนักจากเครื่องชั่ง =====
+  const fetchWeightFromScale = async () => {
+    try {
+      const { weight } = await apiFetchWeightFromScale();
+      setWeight(weight ?? "");
+    } catch (error) {
+      console.error("ไม่สามารถดึงน้ำหนักจากเครื่องชั่งได้:", error);
+    }
+  };
 
   // โหลดตะกร้า/สรุป
   const refreshCart = useCallback(async () => {
@@ -141,11 +172,6 @@ function PurchaseMain() {
     setPhotoB64("");
     setModalErr("");
     setModalOpen(true);
-
-    // ถ่ายพรีวิวจาก hardware ทันที
-    setTimeout(() => {
-      doPreviewFromHardware();
-    }, 0);
   };
 
   // พรีวิวจาก hardware → ได้ base64
@@ -171,18 +197,24 @@ function PurchaseMain() {
   }
 
   async function handleRetake() {
-    await doPreviewFromHardware();
+    // กลับไปเป็นกล้องสด
+    setPhotoB64("");
+    setSnapshotUrl("");
+    setCaptured(false);
+    setModalErr("");
   }
 
   // ยืนยันเพิ่มรายการ
   const handleConfirmAdd = async () => {
     if (!selectedProduct?.prod_id || !Number(weight)) return;
-    if (!photoB64) { setModalErr("กรุณาถ่ายรูปสินค้า"); return; }
+    if (!photoB64) {
+      setModalErr("กรุณาถ่ายรูปสินค้า");
+      return;
+    }
 
     setSubmitLoading(true);
     setModalErr("");
     try {
-      // แปลง roundStep → พารามิเตอร์ของ backend
       const commitOpts =
         roundStep === "normal"
           ? { round_mode: "none" }
@@ -325,7 +357,7 @@ function PurchaseMain() {
     }
     return null;
   };
-  const getPrice = (p) => Number(p?.prod_price ?? p?.price ?? 0).toLocaleString();
+  const getPrice = (p) => formatPrice(p?.prod_price ?? p?.price);
   const getUnit = (p) => (p?.unit ? ` / ${p.unit}` : "");
 
   return (
@@ -343,19 +375,15 @@ function PurchaseMain() {
                 return (
                   <div key={p.prod_id ?? p.id} className="col">
                     <div className="card" onClick={() => onProductClick(p)}>
-                      {img ? (
-                        <img src={img} alt={p.prod_name} className="thumb" />
-                      ) : (
-                        <div
-                          className="thumb d-flex align-items-center justify-content-center"
-                          style={{ background: "#f5f7f9" }}
-                        >
+                      <div className="thumb-wrap">
+                        {img ? (
+                          <img src={img} alt={p.prod_name} />
+                        ) : (
                           <span style={{ color: "#9aa7b2", fontSize: 13 }}>
                             ไม่มีรูปสินค้า
                           </span>
-                        </div>
-                      )}
-
+                        )}
+                      </div>
                       <div className="card-body">
                         <h6 className="card-title mb-1">
                           {p.prod_name ?? p.name}
@@ -463,23 +491,14 @@ function PurchaseMain() {
                         </div>
                       ) : (
                         <div className="item-price">
-                          {Number(it.price).toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}{" "}
-                          บาท
+                          {formatPrice(it.price)} บาท
                         </div>
-
                       )}
                     </div>
 
                     <div className="item-meta">
                       {Number(it.weight).toLocaleString()} kg /{" "}
-                      {unitPrice.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}{" "}
-                      บาท
+                      {formatPrice(unitPrice)} บาท
                     </div>
                   </div>
                 );
@@ -491,11 +510,7 @@ function PurchaseMain() {
             <div className="checkout-row">
               <div>ยอดรวม</div>
               <div>
-                {Number(total).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}
-                บาท
+                {formatPrice(total)} บาท
               </div>
             </div>
             <div className="checkout-buttons">
@@ -524,276 +539,46 @@ function PurchaseMain() {
         </aside>
       </div>
 
-      {/* ==== Modal เพิ่มรายการรับซื้อ ==== */}
-      {modalOpen && selectedProduct && (
-        <>
-          <div
-            className="modal fade show modal-add"
-            style={{ display: "block", background: "rgba(0,0,0,.45)" }}
-            role="dialog"
-            aria-modal="true"
-          >
-            <div className="modal-dialog">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">รายละเอียด</h5>
-                  <div className="close-wrap">
-                    <button
-                      className="btn-close-circle"
-                      onClick={() => setModalOpen(false)}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
+      {/* ==== popup สินค้าที่รับซื้อ ==== */}
+      <AddItemModal
+        modalOpen={modalOpen}
+        selectedProduct={selectedProduct}
+        modalErr={modalErr}
+        liveCameraUrl={liveCameraUrl}
+        photoB64={photoB64}
+        capturing={capturing}
+        captured={captured}
+        snapshotUrl={snapshotUrl}
+        weight={weight}
+        setWeight={setWeight}
+        fetchWeightFromScale={fetchWeightFromScale}
+        roundStep={roundStep}
+        setRoundStep={setRoundStep}
+        submitLoading={submitLoading}
+        doPreviewFromHardware={doPreviewFromHardware}
+        handleRetake={handleRetake}
+        handleConfirmAdd={handleConfirmAdd}
+        onClose={() => setModalOpen(false)}
+      />
 
-                <div className="modal-body">
-                  {modalErr && (
-                    <div className="alert alert-danger py-2 mb-2">
-                      {modalErr}
-                    </div>
-                  )}
-
-                  {/* === กล้องพรีวิว (ผ่าน hardware) === */}
-                  <div className="upload-wrap">
-                    <div className="upload-box">
-                      <div
-                        className="upload-img"
-                        style={{
-                          background: "#dcdcdc",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {capturing && (
-                          <span className="upload-label">กำลังถ่ายภาพ…</span>
-                        )}
-                        {!capturing && captured && snapshotUrl && (
-                          <img src={snapshotUrl} alt="snapshot" className="upload-img" />
-                        )}
-                        {!capturing && !captured && (
-                          <span className="text-muted">ยังไม่มีรูป</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <p className="text-danger small mt-2">
-                      * ถ่ายรูปลูกค้าคู่กับสินค้าที่นำมาขาย
-                    </p>
-
-                    <div className="anon-actions">
-                      {!captured ? (
-                        <button
-                          type="button"
-                          className="btn-save-photo"
-                          onClick={doPreviewFromHardware}
-                          disabled={capturing}
-                        >
-                          บันทึกรูป
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="btn-retake"
-                          onClick={handleRetake}
-                          disabled={capturing}
-                        >
-                          ถ่ายใหม่
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="row g-3 mt-2">
-                    <div className="col-12">
-                      <div className="field-label">ราคาต่อหน่วย</div>
-                      <input
-                        className="form-control input-ctl"
-                        value={`${Number(selectedProduct?.prod_price || 0).toLocaleString()} บาท${selectedProduct?.unit ? ` / ${selectedProduct.unit}` : ""}`}
-                        readOnly
-                      />
-                    </div>
-
-                    <div className="col-12 col-sm-6">
-                      <div className="field-label">น้ำหนัก (กรอกเองได้)</div>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        className="form-control input-ctl"
-                        value={weight}
-                        onChange={(e) => setWeight(e.target.value)}
-                        placeholder="เช่น 1.25"
-                      />
-                    </div>
-
-                    <div className="col-12 col-sm-6">
-                      <div className="field-label">โหมดปัดราคา</div>
-
-                      <div className="d-flex gap-3 align-items-center">
-                        <div className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="radio"
-                            id="round-normal"
-                            name="roundStep"
-                            value="normal"
-                            checked={roundStep === "normal"}
-                            onChange={(e) => setRoundStep(e.target.value)}
-                          />
-                          <label className="form-check-label" htmlFor="round-normal">
-                            คำนวณปกติ
-                          </label>
-                        </div>
-
-                        <div className="form-check">
-                          <input
-                            className="form-check-input"
-                            type="radio"
-                            id="round-1"
-                            name="roundStep"
-                            value="1"
-                            checked={roundStep === "1"}
-                            onChange={(e) => setRoundStep(e.target.value)}
-                          />
-                          <label className="form-check-label" htmlFor="round-1">
-                            ปัดเศษ
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="modal-footer footer-actions">
-                  <button
-                    className="btn-cancel-outline"
-                    onClick={() => setModalOpen(false)}
-                  >
-                    ยกเลิก
-                  </button>
-                  <button
-                    className="btn-confirm"
-                    onClick={handleConfirmAdd}
-                    disabled={
-                      !selectedProduct?.prod_id || !Number(weight) || submitLoading || !photoB64
-                    }
-                  >
-                    {submitLoading ? "กำลังยืนยัน..." : "ยืนยัน"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="modal-backdrop fade show" />
-        </>
-      )}
 
       {/* ==== popup ยืนยันการลบ ==== */}
-      {showDeleteModal && (
-        <div className="modal-payment" role="dialog" aria-modal="true">
-          <div className="dialog">
-            <div className="header">
-              ยืนยันการลบรายการ
-              <div className="close-wrap">
-                <button
-                  type="button"
-                  className="btn-close-circle"
-                  aria-label="Close"
-                  onClick={() => setShowDeleteModal(false)}
-                  title="ปิด"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-
-            <div className="body">
-              <div className="price-large" style={{ fontSize: 20 }}>
-                ต้องการลบรายการนี้ใช่หรืไม่ ?
-              </div>
-            </div>
-
-            <div className="footer">
-              {/* ปุ่มลบ */}
-              <button
-                type="button"
-                className="btn-noreceipt"
-                onClick={confirmDeleteItem}
-                disabled={deleting}
-                title={deleting ? "กำลังลบ..." : undefined}
-              >
-                ลบรายการ
-              </button>
-
-              {/* ปุ่มยกเลิก */}
-              <button
-                type="button"
-                className="btn-receipt"
-                onClick={() => setShowDeleteModal(false)}
-                disabled={deleting}
-              >
-                ยกเลิก
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteItemModal
+        open={showDeleteModal}
+        deleting={deleting}
+        onConfirm={confirmDeleteItem}
+        onCancel={() => setShowDeleteModal(false)}
+      />
 
       {/* ==== popup ชำระเงิน  ==== */}
-      {showPayModal && (
-        <div className="modal-payment" role="dialog" aria-modal="true">
-          <div className="dialog" key={`dlg-${payMethod}`}>
-            <div className="header">
-              ชำระเงิน ‘{payMethod}’
-              <div className="close-wrap">
-                <button
-                  type="button"
-                  className="btn-close-circle"
-                  aria-label="Close"
-                  onClick={() => setShowPayModal(false)}
-                  title="ปิด"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-
-            <div className="body">
-              <div className="price-large">
-                ฿{" "}
-                {Number(total).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </div>
-            </div>
-
-            <div className="footer">
-              <button
-                type="button"
-                className="btn-receipt"
-                onClick={() => handlePayClick(true)}
-                disabled={paying}
-                title={paying ? "กำลังชำระเงิน..." : undefined}
-              >
-                พิมพ์ใบเสร็จ
-              </button>
-
-              <button
-                type="button"
-                className="btn-noreceipt"
-                onClick={() => handlePayClick(false)}
-                disabled={paying}
-                title={paying ? "กำลังชำระเงิน..." : undefined}
-              >
-                ไม่พิมพ์ใบเสร็จ
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PayModal
+        open={showPayModal}
+        payMethod={payMethod}
+        total={total}
+        paying={paying}
+        onClose={() => setShowPayModal(false)}
+        onPay={handlePayClick}
+      />
 
       {/* ==== popup ยืนยัน ==== */}
       {showConfirmPay && (

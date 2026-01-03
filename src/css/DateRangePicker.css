@@ -1,0 +1,193 @@
+/* ======================================================
+   DateRangePicker – Wrapper / Base
+   ====================================================== */
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker__input-container input {
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  height: 38px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #d0d7de;
+  background: #ffffff;
+}
+
+.react-datepicker__input-container input:focus {
+  outline: none;
+  border-color: #198754;
+  box-shadow: 0 0 0 2px rgba(25,135,84,.15);
+}
+
+/* placeholder */
+.react-datepicker__input-container input::placeholder {
+  color: #9ca3af;
+}
+
+/* ======================================================
+   DateRangePicker – Text
+   ====================================================== */
+
+.date-range-title {
+  font-family: 'Kanit', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f7a4f;
+  margin-bottom: 6px;
+}
+
+.date-range-label {
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000000;
+  margin-bottom: 2px;
+  display: block;
+}
+
+/* ======================================================
+   DateRangePicker – Action Buttons
+   ====================================================== */
+
+.date-clear-btn {
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #6b7280;
+  transition: all 0.15s ease;
+}
+
+.date-clear-btn:hover {
+  background: #f9fafb;
+  color: #374151;
+}
+
+.date-clear-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(209,213,219,.4);
+}
+
+.date-apply-btn {
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: #198754;
+  border: none;
+  color: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.date-apply-btn:hover {
+  background: #157347;
+}
+
+.date-apply-btn:active {
+  transform: translateY(1px);
+}
+
+.date-apply-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(25,135,84,.25);
+}
+
+/* ======================================================
+   react-datepicker – Compact & Aligned (FINAL FIX)
+   ====================================================== */
+
+.react-datepicker {
+  font-family: 'Kanit', sans-serif;
+  font-size: 12px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  padding: 4px;
+}
+
+/* ---------- Header ---------- */
+
+.react-datepicker__header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 6px 0 4px;
+  text-align: center;
+}
+
+.react-datepicker__current-month {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ---------- Navigation ---------- */
+
+.react-datepicker__navigation {
+  top: 8px;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-width: 1.5px;
+  border-color: #198754;
+}
+
+/* ---------- Grid Alignment ---------- */
+
+.react-datepicker__day-names,
+.react-datepicker__week {
+  display: flex;
+  justify-content: center;
+}
+
+/* ชื่อวัน + ช่องวัน ต้องกว้างเท่ากัน */
+.react-datepicker__day-name,
+.react-datepicker__day {
+  width: 2rem;
+  line-height: 2rem;
+  margin: 0;
+  text-align: center;
+}
+
+/* ---------- Day Names ---------- */
+
+.react-datepicker__day-name {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* ---------- Days ---------- */
+
+.react-datepicker__day {
+  font-size: 12px;
+  border-radius: 6px;
+  color: #111827;
+}
+
+.react-datepicker__day:hover {
+  background: #f3f4f6;
+}
+
+/* selected */
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background: #198754;
+  color: #ffffff;
+}
+
+/* today */
+.react-datepicker__day--today {
+  border: 1px solid #198754;
+  font-weight: 600;
+}
+
+/* disabled */
+.react-datepicker__day--disabled {
+  color: #cbd5e1;
+}

@@ -1,5 +1,14 @@
 import api from "./client";
 
+/* ==== เครื่องชั่ง ==== */
+export const fetchWeightFromScale = async (purchaseId) => {
+  const { data } = await api.get(
+    `/purchases/${purchaseId}/scale`,
+    { timeout: 5000 }
+  );
+  return data;
+};
+
 /* ==== ID Card ==== */
 
 // พรีวิวข้อมูลบัตร (ยังไม่บันทึก)
@@ -42,15 +51,12 @@ export const deleteOpenPurchase = () =>
 
 /* ==== กล้อง (Anonymous) ==== */
 
-export const captureAnonymousPreview = (device_index = 0, warmup = 8) =>
-  api
-    .post(
-      "/purchases/quick-open/anonymous/preview",
-      null,
-      { params: { device_index, warmup }, timeout: 25000 }
-    )
-    .then((r) => r.data);
+// ⚠️ สำคัญ: ต้องเป็น absolute URL เท่านั้น
+export const anonymousLiveCameraUrl =
+  api.defaults.baseURL.replace(/\/+$/, "") +
+  "/purchases/quick-open/anonymous/live";
 
+// commit anonymous
 export const commitAnonymous = ({
   photo_base64,
   on_open = "return",
@@ -64,6 +70,32 @@ export const commitAnonymous = ({
     )
     .then((r) => r.data);
 
+// capture snapshot จาก backend
+export async function captureFromBackend() {
+  const res = await api.post(
+    "/purchases/quick-open/anonymous/preview",
+    null,
+    { timeout: 25000 }
+  );
+
+  const b64 = res.data.photo_base64;
+
+  // base64 → blob
+  const byteChars = atob(b64);
+  const byteNums = new Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) {
+    byteNums[i] = byteChars.charCodeAt(i);
+  }
+
+  const blob = new Blob(
+    [new Uint8Array(byteNums)],
+    { type: "image/jpeg" }
+  );
+  const blobUrl = URL.createObjectURL(blob);
+
+  return { base64: b64, blobUrl };
+}
+
 /* ==== Hardware ==== */
 
 export const cameraStatus = (device_index = 0, probe_frame = true) =>
@@ -76,7 +108,6 @@ export const cameraStatus = (device_index = 0, probe_frame = true) =>
 
 /* ==== รายชื่อลูกค้า ==== */
 
-// ดึงรายชื่อลูกค้า
 export const listCustomers = ({ q = "", page = 1, page_size = 20 } = {}) =>
   api
     .get("/purchases/customers", {
@@ -111,12 +142,12 @@ export async function payPurchase(
   const { data } = await api.post(
     `/purchases/${purchaseId}/pay`,
     { payment_method, print_receipt },
-    { timeout: 15000 } // ใส่ timeout กันค้าง
+    { timeout: 15000 }
   );
   return data;
 }
 
-/* ==== พิมพ์ใบเสร็จ  ==== */
+/* ==== พิมพ์ใบเสร็จ ==== */
 
 export async function printReceipt(purchaseId) {
   const { data } = await api.post(
@@ -124,7 +155,7 @@ export async function printReceipt(purchaseId) {
     null,
     { timeout: 10000 }
   );
-  return data; 
+  return data;
 }
 
 /* ==== สถานะการชำระ ==== */
@@ -133,6 +164,3 @@ export const getPaymentInfo = (purchaseId) =>
   api
     .get(`/purchases/${purchaseId}/payment`, { timeout: 10000 })
     .then((r) => r.data);
-
-
-    

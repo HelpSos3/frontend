@@ -1,10 +1,6 @@
-// src/api/inventory.js
 import api from "./client";
 
-/**
- * ✅ 1) ดึงรายการสินค้าในคลัง
- *    GET /inventory/items
- */
+/* ดึงรายการสินค้าในคลัง */
 export async function listInventoryItems(params = {}) {
   const {
     page = 1,
@@ -18,13 +14,10 @@ export async function listInventoryItems(params = {}) {
   const res = await api.get("/inventory/items", {
     params: { page, per_page, q, category_id, sort, only_active },
   });
-  return res.data; // => { items: [...], page, per_page, total }
+  return res.data; 
 }
 
-/**
- * ✅ 2) ดาวน์โหลดรายงาน Excel
- *    GET /inventory/export
- */
+/* ดาวน์โหลดไฟล์ Excel */
 export async function exportInventoryExcel(params = {}) {
   const {
     q = "",
@@ -35,11 +28,11 @@ export async function exportInventoryExcel(params = {}) {
 
   const res = await api.get("/inventory/export", {
     params: { q, category_id, sort, only_active },
-    responseType: "blob", // เพื่อรับไฟล์เป็น binary
+    responseType: "blob",  //ข้อมูลที่กลับมาเป็นไฟล์ binary 
   });
 
   // สร้างลิงก์ดาวน์โหลดไฟล์ Excel
-  const url = window.URL.createObjectURL(new Blob([res.data]));
+  const url = window.URL.createObjectURL(new Blob([res.data])); //แปลง binary เป็น url ให้เบราเซอร์โหลดได้
   const link = document.createElement("a");
   link.href = url;
   link.setAttribute("download", "รายงานคลังสินค้า.xlsx");
@@ -49,20 +42,16 @@ export async function exportInventoryExcel(params = {}) {
   window.URL.revokeObjectURL(url);
 }
 
-/**
- * ✅ 3) ขายสินค้า (หลายรายการ)
- *    POST /inventory/sell
- *    @param lines: [{ prod_id, weight_sold, note }]
- */
+/* ขายสินค้า */
 export async function sellInventory(lines = []) {
   if (!Array.isArray(lines) || lines.length === 0)
     throw new Error("ไม่มีรายการสินค้าที่จะขาย");
 
   const res = await api.post("/inventory/sell", lines);
-  return res.data; // => { ok: true, created: [...] }
+  return res.data; 
 }
 
-// ------------------- Utils (optional ช่วยแปลงวันที่) -------------------
+// optional ช่วยแปลงวันที่
 function buildHistoryParams({ date_from, date_to, page = 1, per_page = 20 } = {}) {
   const params = { page, per_page };
   if (date_from) {
@@ -74,32 +63,80 @@ function buildHistoryParams({ date_from, date_to, page = 1, per_page = 20 } = {}
   return params;
 }
 
-/**
- * ✅ 4) ดูประวัติ "รับซื้อ" ของสินค้า (แบบ simple)
- *    GET /inventory/purchased_history_simple/{prod_id}
- *    @param prod_id: number
- *    @param options: { date_from?: Date|string, date_to?: Date|string, page?: number, per_page?: number }
- *    @return { items, page, per_page, total }
- */
+/* ดูประวัติ รับซื้อ ของสินค้า */
 export async function getPurchasedHistorySimple(prod_id, options = {}) {
-  if (!prod_id) throw new Error("ต้องระบุ prod_id");
+  if (!prod_id) throw new Error("ต้องระบุ รหัสสินค้า");
   const res = await api.get(`/inventory/purchased_history_simple/${prod_id}`, {
     params: buildHistoryParams(options),
   });
   return res.data;
 }
 
-/**
- * ✅ 5) ดูประวัติ "ขาย" ของสินค้า (แบบ simple)
- *    GET /inventory/sold_history_simple/{prod_id}
- *    @param prod_id: number
- *    @param options: { date_from?: Date|string, date_to?: Date|string, page?: number, per_page?: number }
- *    @return { items, page, per_page, total }
- */
+/* ดูประวัติ ขาย ของสินค้า */
 export async function getSoldHistorySimple(prod_id, options = {}) {
-  if (!prod_id) throw new Error("ต้องระบุ prod_id");
+  if (!prod_id) throw new Error("ต้องระบุ รหัสสินค้า");
   const res = await api.get(`/inventory/sold_history_simple/${prod_id}`, {
     params: buildHistoryParams(options),
   });
   return res.data;
+}
+
+/* ตัวกรองข้อมูล */
+function buildExportParams({
+  q = "",
+  category_id = null,
+  only_active = true,
+  date_from,
+  date_to,
+  prod_ids, 
+} = {}) {
+  const params = { q, category_id, only_active };
+
+  if (date_from) {
+    params.date_from = date_from instanceof Date ? date_from.toISOString() : date_from;
+  }
+  if (date_to) {
+    params.date_to = date_to instanceof Date ? date_to.toISOString() : date_to;
+  }
+  if (prod_ids && Array.isArray(prod_ids)) {
+    params.prod_ids = prod_ids.join(","); // ฝั่งหลังบ้านรับ CSV
+  } else if (typeof prod_ids === "string") {
+    params.prod_ids = prod_ids;
+  }
+
+  return params;
+}
+
+/* Export: รายการรับซื้อทั้งหมด */
+export async function exportPurchasedExcel(params = {}) {
+  const res = await api.get("/inventory/export_purchased", {
+    params: buildExportParams(params),
+    responseType: "blob",
+  });
+
+  const url = window.URL.createObjectURL(new Blob([res.data]));
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "รายงานรับซื้อ.xlsx");
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
+
+/* Export: รายการขายออกทั้งหมด */
+export async function exportSoldExcel(params = {}) {
+  const res = await api.get("/inventory/export_sold", {
+    params: buildExportParams(params),
+    responseType: "blob",
+  });
+
+  const url = window.URL.createObjectURL(new Blob([res.data]));
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "รายงานขายออก.xlsx");
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
 }

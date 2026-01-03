@@ -1,0 +1,164 @@
+/* ================================
+   Customer Detail Page
+   ================================ */
+
+/* ทั้งหน้า */
+.page-wrap, 
+.cd-page {
+  height: calc(100vh - 0px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ปุ่มย้อนกลับ */
+.cd-back {
+  margin-bottom: 14px;
+}
+
+.cd-back-btn {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  font-family: 'Kanit', sans-serif;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* กล่อง card */
+.cd-card {
+  background:#ffffff;
+  border-radius:16px;
+  padding:20px 22px 16px;
+  box-shadow:0 2px 14px rgba(0,0,0,.08);
+
+  height: 700px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ================================
+   ชื่อ + หัวข้อ
+   ================================ */
+.cd-name-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1b1b1b;
+  margin-bottom: 18px;
+  font-family: 'Kanit', sans-serif;
+}
+
+.cd-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 20px 0 12px;
+  color: #167044;
+  font-family: 'Kanit', sans-serif;
+}
+
+/* กล่องข้อมูลลูกค้า */
+.cd-info-box { margin-bottom: 24px; }
+.cd-info-row { display: flex; gap: 14px; margin-bottom: 10px; }
+.cd-info-label { min-width: 200px; font-weight: 600; font-family:'Kanit';  color: #000; }
+.cd-info-value { flex: 1; font-family:'Kanit'; color:#000; line-height:1.4; }
+
+/* ================================
+   ตารางสินค้า
+   ================================ */
+.cd-table-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* แก้ตารางให้ align ตรง 100% */
+.cd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Kanit', sans-serif;
+  font-size: 15px;
+  table-layout: auto;   /* สำคัญ: ปล่อยให้ browser จัดคอลัมน์เอง */
+}
+
+/* หัวตาราง */
+.cd-table thead th {
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 600;
+  padding: 12px;
+  border-bottom: 2px solid #e5e7eb;
+  text-align: center;
+  white-space: nowrap;
+  position: sticky;      /* ให้หัวอยู่บนสุด */
+  top: 0;
+  z-index: 2;
+}
+
+/* ช่องข้อมูล */
+.cd-table td {
+  padding: 12px;
+  text-align: center;
+  border-top: 1px solid #edf1f5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #000;
+}
+
+/* สีสลับแถว */
+.cd-table tbody tr:nth-child(odd) td { background: #ffffff; }
+.cd-table tbody tr:nth-child(even) td { background: #f3f5fb; }
+
+/* ================================
+   Pagination
+   ================================ */
+.cs-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.cs-pager {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pager-text {
+  background: transparent;
+  border: 0;
+  color: #9aa3ad;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.page-pill {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ececec;
+  font-size: 12px;
+  text-align: center;
+  line-height: 28px;
+  cursor: pointer;
+}
+.page-pill:hover { background:#e6e6e6; }
+.page-pill.active {
+  background: #218150;
+  border-color: #218150;
+  color: #fff;
+}
+
+/* ================================
+   Responsive
+   ================================ */
+@media (max-width: 768px) {
+  .cd-card { height: auto; }
+  .cd-info-row { flex-direction: column; }
+  .cd-info-label { min-width: 100%; }
+}

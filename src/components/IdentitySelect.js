@@ -1,33 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AnonymousModal from "./AnonymousModal";
-import {
-  previewIdCard,
-  quickOpenIdCard,
-  getOpenPurchase,
-  deleteOpenPurchase,
-} from "../api/purchases";
+import { previewIdCard, quickOpenIdCard, getOpenPurchase, deleteOpenPurchase, } from "../api/purchases";
 import "../css/IdentitySelect.css";
 
 import faceIcon from "../image/identityscan.png";
 import personIcon from "../image/Anonymous.png";
 import groupIcon from "../image/CustomerSelect.png";
 
-// แปลงวันที่-เวลาเป็นแบบไทย 
+
 const formatDateThai = (input) => {
   if (!input) return "";
+
   const d = new Date(input);
-  try {
-    const day = d.getDate().toString().padStart(2, "0");
-    const month = (d.getMonth() + 1).toString().padStart(2, "0");
-    const year = (d.getFullYear() + 543).toString().slice(-2); // แปลงเป็น พ.ศ. แล้วเอา 2 หลักท้าย
-    const hours = d.getHours().toString().padStart(2, "0");
-    const minutes = d.getMinutes().toString().padStart(2, "0");
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
-  } catch {
-    return "";
-  }
+  if (isNaN(d.getTime())) return "";
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = String(d.getFullYear());
+
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
 };
+
 
 export default function IdentitySelect() {
   const navigate = useNavigate();
@@ -169,7 +166,7 @@ export default function IdentitySelect() {
             <div className="modal-dialog modal-md modal-dialog-centered">
               <div className="modal-content rounded-4">
                 <div className="modal-header border-0">
-                  <h5 className="modal-title fw-bold">พบใบเปิดค้างอยู่</h5>
+                  <h5 className="modal-title fw-bold">พบบิลเปิดค้างอยู่</h5>
                 </div>
                 <div className="modal-body">
                   <div className="open-bill-summary mb-3">
@@ -349,6 +346,9 @@ export default function IdentitySelect() {
                         )}
                       </div>
                     </div>
+                    <p className="text-danger small mt-2" >
+                      *หมายเหตุ: ต้องได้รับความยินยอมจากลูกค้าก่อนทุกครั้ง
+                    </p>
                   </div>
                 </div>
 

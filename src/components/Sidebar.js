@@ -101,22 +101,22 @@ export default function Sidebar() {
       <div className="section-label px-2 mt-4 mb-1">ประวัติการรับซื้อ</div>
       <ul className="nav nav-pills flex-column gap-1">
         <MenuItem
-          to="/transactions"
+          to="/purchase-order"
           label="รายการรับซื้อ"
           icon={iconShopping}
           iconActive={iconShoppingActive}
-        />
-        <MenuItem
-          to="/receipts"
-          label="บิลใบเสร็จ"
-          icon={iconReceipt}
-          iconActive={iconReceiptActive}
         />
         <MenuItem
           to="/customers"
           label="ลูกค้า"
           icon={iconPeople}
           iconActive={iconPeopleActive}
+        />
+        <MenuItem
+          to="/receipts"
+          label="บิลใบเสร็จ"
+          icon={iconReceipt}
+          iconActive={iconReceiptActive}
         />
       </ul>
 

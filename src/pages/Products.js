@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { getProducts, getProductsFiltered, enableProduct } from "../api/products";
 import { getCategories } from "../api/categories";
 import AddProductModal from "../components/AddProductModal";
@@ -63,6 +63,14 @@ export default function AllProducts() {
     }
   }
 
+  const filteredIems = useMemo(() => {
+    if (!q.trim()) return items;
+
+    return items.filter((x) =>
+      x.prod_name?.toLowerCase().startsWith(q.toLowerCase())
+    );
+  }, [q, items]);
+
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -78,6 +86,7 @@ export default function AllProducts() {
     }, 300);
     return () => clearTimeout(t);
   }, [q, categoryId]); // eslint-disable-line
+
 
   const handleCategoryCreated = (cat) => {
     setCategories((prev) => {
@@ -143,7 +152,7 @@ export default function AllProducts() {
       ) : (
         <>
           <div className="row g-0 products-grid">
-            {items.map((it) => {
+            {filteredIems.map((it) => {
               const imgUrl = resolveImageUrl(it.prod_img);
               return (
                 <div className="col" key={it.prod_id}>
@@ -156,12 +165,12 @@ export default function AllProducts() {
                     style={{ cursor: "pointer" }}
                   >
                     {imgUrl ? (
-                      <img
-                        src={imgUrl}
-                        className="thumb"
-                        alt={it.prod_name}
-                        onError={(e) => (e.currentTarget.style.display = "none")}
-                      />
+                      <div className="thumb-wrap">
+                        <img
+                          src={imgUrl}
+                          alt={it.prod_name}
+                        />
+                      </div>
                     ) : (
                       <div className="thumb d-flex align-items-center justify-content-center">
                         <span className="text-muted small">ไม่มีรูป</span>
@@ -173,9 +182,9 @@ export default function AllProducts() {
                         {it.prod_name}
                       </div>
                       <div className="price-small">
-                        {Number(it.prod_price || 0).toLocaleString(undefined, {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
+                        {Number(it.prod_price || 0).toLocaleString("th-TH", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
                         })}{" "}
                         บาท
                       </div>

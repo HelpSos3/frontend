@@ -1,0 +1,115 @@
+/* ===============================
+   Popup ข้อมูลลูกค้า
+   =============================== */
+
+.pcm-modal {
+  font-family: "Kanit", sans-serif;
+}
+
+/* ===== Dialog ===== */
+.pcm-dialog {
+  max-width: 760px;
+  width: 100%;
+}
+
+.pcm-modal .modal-content {
+  border-radius: 20px;
+  border: none;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12);
+  overflow: hidden;
+}
+
+/* ===== Header ===== */
+.pcm-header {
+  border: none;
+  padding-top: 16px;
+  padding-bottom: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pcm-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111;
+  text-align: center;
+  width: 100%;
+}
+
+.close-wrap {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+}
+
+.btn-close-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.btn-close-circle:hover {
+  background: #f3f4f6;
+}
+
+/* ===== Body ===== */
+.pcm-body {
+  padding: 20px;
+}
+
+/* ===== กรอบสีเขียว (กรอบเดียว) ===== */
+.pcm-box {
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  border-radius: 18px;
+  padding: 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ข้อมูลแต่ละบรรทัด */
+.pcm-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pcm-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.pcm-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  word-break: break-word;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 576px) {
+  .pcm-dialog {
+    max-width: calc(100% - 20px);
+  }
+
+  .pcm-body {
+    padding: 16px;
+  }
+
+  .pcm-value {
+    font-size: 15px;
+  }
+}
