@@ -46,10 +46,13 @@ export default function InventoryDetail() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
+  const [productName, setProductName] = useState(
+    prodNameFromState || "สินค้า"
+  );
+
   const title = useMemo(() => {
-    if (prodNameFromState) return `รายละเอียด ${prodNameFromState}`;
-    return "รายละเอียดสินค้า";
-  }, [prodNameFromState]);
+    return `รายละเอียด ${productName}`;
+  }, [productName]);
 
   // โหลดข้อมูล ซื้อหรือขาย
   const fetchData = useCallback(async () => {
@@ -72,6 +75,16 @@ export default function InventoryDetail() {
 
       setRows(data?.items || []);
       setTotal(Number(data?.total || 0));
+
+      if (
+        !prodNameFromState &&
+        data?.items?.length > 0 &&
+        data.items[0]?.prod_name
+      ) {
+        setProductName((prev) =>
+          prev === "สินค้า" ? data.items[0].prod_name : prev
+        );
+      }
     } catch (e) {
       setErr(e?.message || "โหลดข้อมูลไม่สำเร็จ");
       setRows([]);
@@ -79,7 +92,7 @@ export default function InventoryDetail() {
     } finally {
       setLoading(false);
     }
-  }, [pid, page, perPage, activeTab, dateFrom, dateTo]);
+  }, [pid, page, perPage, activeTab, dateFrom, dateTo, prodNameFromState]);
 
   useEffect(() => {
     fetchData();
@@ -179,8 +192,12 @@ export default function InventoryDetail() {
                 <th className="text-center">วันที่</th>
                 <th className="text-center">เวลา</th>
                 <th className="text-center">จำนวน (kg)</th>
-                {activeTab === "purchased" && <th className="text-center">ราคา</th>}
-                {activeTab === "sold" && <th className="text-center">หมายเหตุ</th>}
+                {activeTab === "purchased" && (
+                  <th className="text-center">ราคา</th>
+                )}
+                {activeTab === "sold" && (
+                  <th className="text-center">หมายเหตุ</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -199,15 +216,25 @@ export default function InventoryDetail() {
               ) : (
                 rows.map((r, idx) => (
                   <tr key={idx} className={`cs-row ${idx % 2 ? "even" : "odd"}`}>
-                    <td className="text-start fw-semibold">{r.prod_name || "-"}</td>
-                    <td className="text-center">{formatDateThai(r.date)}</td>
-                    <td className="text-center">{formatTimeThai(r.date)}</td>
+                    <td className="text-start fw-semibold">
+                      {r.prod_name || "-"}
+                    </td>
                     <td className="text-center">
-                      {r.weight != null ? `${Number(r.weight).toLocaleString()} kg` : "-"}
+                      {formatDateThai(r.date)}
+                    </td>
+                    <td className="text-center">
+                      {formatTimeThai(r.date)}
+                    </td>
+                    <td className="text-center">
+                      {r.weight != null
+                        ? `${Number(r.weight).toLocaleString()} kg`
+                        : "-"}
                     </td>
                     {activeTab === "purchased" && (
                       <td className="text-center">
-                        {r.price != null ? Number(r.price).toLocaleString() : "-"}
+                        {r.price != null
+                          ? Number(r.price).toLocaleString()
+                          : "-"}
                       </td>
                     )}
                     {activeTab === "sold" && (
@@ -224,7 +251,10 @@ export default function InventoryDetail() {
         <div className="cs-footer justify-content-center">
           <div className="cs-pager">
             {!isFirstPage && (
-              <button className="pager-text" onClick={() => setPage((p) => p - 1)}>
+              <button
+                className="pager-text"
+                onClick={() => setPage((p) => p - 1)}
+              >
                 ก่อนหน้า
               </button>
             )}
@@ -240,7 +270,10 @@ export default function InventoryDetail() {
             ))}
 
             {!isLastPage && (
-              <button className="pager-text" onClick={() => setPage((p) => p + 1)}>
+              <button
+                className="pager-text"
+                onClick={() => setPage((p) => p + 1)}
+              >
                 ถัดไป
               </button>
             )}

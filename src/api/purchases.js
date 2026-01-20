@@ -9,8 +9,7 @@ export const fetchWeightFromScale = async (purchaseId) => {
   return data;
 };
 
-/* ==== ID Card ==== */
-
+/* ==== สแกนบัตรประชาชน ==== */
 // พรีวิวข้อมูลบัตร (ยังไม่บันทึก)
 export const previewIdCard = ({ reader_index = 0, with_photo = 1 } = {}) =>
   api
@@ -39,19 +38,16 @@ export const quickOpenIdCard = ({
     .then((r) => r.data);
 
 /* ==== เปิดบิล ==== */
-
 export const getOpenPurchase = () =>
   api.get("/purchases/open", { timeout: 10000 }).then((r) => r.data);
 
-// ลบบิล OPEN ล่าสุด
+// ลบบิล Open ล่าสุด
 export const deleteOpenPurchase = () =>
   api
     .delete("/purchases/open", { params: { confirm: true }, timeout: 10000 })
     .then((r) => r.data);
 
-/* ==== กล้อง (Anonymous) ==== */
-
-// ⚠️ สำคัญ: ต้องเป็น absolute URL เท่านั้น
+/* ==== กล้องสด (Anonymous) ==== */
 export const anonymousLiveCameraUrl =
   api.defaults.baseURL.replace(/\/+$/, "") +
   "/purchases/quick-open/anonymous/live";

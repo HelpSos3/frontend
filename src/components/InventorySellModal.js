@@ -9,7 +9,7 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
   const [submitting, setSubmitting] = useState(false);
   const [note, setNote] = useState("");
 
-  //โหลดข้อมูลสินค้าที่เลือก
+  // โหลดข้อมูลสินค้าที่เลือก
   useEffect(() => {
     if (show) {
       setLines(
@@ -25,7 +25,7 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
     }
   }, [show, selectedItems]);
 
-  //ล็อก scroll ของหน้า เวลา modal เปิดอยู่
+  // ล็อก scroll ของหน้า เวลา modal เปิดอยู่
   useEffect(() => {
     if (show) {
       document.body.classList.add("modal-open");
@@ -33,7 +33,7 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
     }
   }, [show]);
 
-  //ตรวจสอบค่าที่กรอก
+  // ตรวจสอบค่าที่กรอก 
   const validate = (row) => {
     const n = Number(row.qty);
     if (isNaN(n) || n <= 0) return false;
@@ -41,7 +41,7 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
     return true;
   };
 
-  //คำนวณยอดรวม
+  // คำนวณยอดรวม
   const totalQty = useMemo(
     () =>
       lines.reduce((sum, l) => {
@@ -50,7 +50,8 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
       }, 0),
     [lines]
   );
-  //เปลี่ยนค่าที่ผู้ใช้กรอก
+
+  // เปลี่ยนค่าที่ผู้ใช้กรอก
   const handleChange = (index, field, value) => {
     setLines((prev) => {
       const next = [...prev];
@@ -58,42 +59,67 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
       return next;
     });
   };
-  //ลบรายการสินค้า 1 ตัว
+
+  // ลบรายการสินค้า 1 ตัว
   const handleRemove = (index) => {
     setLines((prev) => prev.filter((_, i) => i !== index));
   };
-  //ส่งข้อมูลขายสินค้าไป api
+
+  // ส่งข้อมูลขายสินค้าไป api
   const handleSubmit = async (e) => {
-    e?.preventDefault?.();
+    e.preventDefault();
     if (submitting) return;
-    //เตรียมข้อมูลที่จะส่ง 
-    const validLines = lines
-      .filter(validate)
-      .map((l) => ({
+
+
+
+    //ตรวจว่าสินค้าที่เลือกมีน้ำหนักในคลังหรือไม่
+    const noBalanceItems = lines.filter(l => l.balance <= 0);
+
+    if (noBalanceItems.length > 0) {
+      const names = noBalanceItems.map(l => `- ${l.prod_name}`).join("\n");
+      setError(
+        "ไม่สามารถขายสินค้าได้ เนื่องจากสินค้าต่อไปนี้ไม่มีน้ำหนักคงเหลือในคลัง:\n" +
+        names
+      );
+      return;
+    }
+
+    
+
+    /* ตรวจว่ามีข้อมูลผิดหรือไม่ */
+    const hasInvalid = lines.some((l) => {
+      const n = Number(l.qty);
+      return isNaN(n) || n <= 0 || n > l.balance;
+    });
+
+    if (hasInvalid) {
+      setError("มีสินค้าบางรายการกรอกจำนวนไม่ถูกต้อง");
+      return;
+    }
+
+    const payload = lines
+      .filter(l => Number(l.qty) > 0)
+      .map(l => ({
         prod_id: l.prod_id,
         weight_sold: Number(l.qty),
         note: note || "",
       }));
 
-    if (!validLines.length) {
-      setError("กรุณาตรวจสอบข้อมูลให้ถูกต้อง");
-      return;
-    }
-
     setSubmitting(true);
     setError("");
-    //ส่งข้อมูลจริงๆ
+
+    // ส่งข้อมูลจริง ๆ
     try {
-      const res = await sellInventory(validLines);
-      if (res) {
-        onSold && onSold(res.created || []);
-        onClose && onClose();
-      } else {
-        throw new Error("ไม่มีข้อมูลตอบกลับจากเซิร์ฟเวอร์");
-      }
+      const res = await sellInventory(payload);
+      onSold && onSold(res.created || []);
+      onClose && onClose();
     } catch (err) {
-      const msg = err?.response?.data?.detail || err?.message || "ขายสินค้าไม่สำเร็จ";
-      setError(msg);
+      const detail = err?.response?.data?.detail;
+      if (typeof detail === "object") {
+        setError(detail.message || "ขายสินค้าไม่สำเร็จ");
+      } else {
+        setError(detail || err.message || "ขายสินค้าไม่สำเร็จ");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -130,7 +156,9 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
                     <div key={l.prod_id} className="sell-item-card">
                       <div className="cell">
                         <div className="cell-label">รหัสสินค้า</div>
-                        <div className="cell-value code">#{String(l.prod_id).padStart(3, "0")}</div>
+                        <div className="cell-value code">
+                          #{String(l.prod_id).padStart(3, "0")}
+                        </div>
                       </div>
 
                       <div className="cell">
@@ -140,7 +168,9 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
 
                       <div className="cell">
                         <div className="cell-label">จำนวนในคลัง</div>
-                        <div className="cell-value balance">{l.balance.toLocaleString()} kg</div>
+                        <div className="cell-value balance">
+                          {l.balance.toLocaleString()} kg
+                        </div>
                       </div>
 
                       <div className="cell">
@@ -152,7 +182,6 @@ export default function InventorySellModal({ show, onClose, selectedItems, onSol
                             step="0.01"
                             value={l.qty}
                             onChange={(e) => handleChange(i, "qty", e.target.value)}
-                            placeholder=""
                           />
                         </div>
                       </div>

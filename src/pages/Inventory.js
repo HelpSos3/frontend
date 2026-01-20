@@ -65,6 +65,10 @@ export default function InventoryPage() {
 
   const [exporting, setExporting] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+
+  const [sellError, setSellError] = useState("");
+
+
   const exportBtnRef = useRef(null);
 
   const reqIdRef = useRef(0);
@@ -107,7 +111,7 @@ export default function InventoryPage() {
         q,
         category_id: categoryId ? Number(categoryId) : null,
         sort: "-balance",
-        only_active: true,
+        only_active: false,
       });
 
       if (myId !== reqIdRef.current) return;
@@ -150,7 +154,7 @@ export default function InventoryPage() {
         prod_ids: prodIds,
         q,
         category_id: categoryId ? Number(categoryId) : undefined,
-        only_active: true,
+        only_active: false,
       };
 
       if (type === "purchased") {
@@ -173,10 +177,18 @@ export default function InventoryPage() {
   };
 
   const toggleSelectAll = () => {
-    const all = items.length > 0 && items.every((i) => selected.has(i.prod_id));
+    const allSelected =
+      items.length > 0 &&
+      items.every((i) => selected.has(i.prod_id));
+
     const next = new Set(selected);
-    if (all) items.forEach((i) => next.delete(i.prod_id));
-    else items.forEach((i) => next.add(i.prod_id));
+
+    if (allSelected) {
+      items.forEach((i) => next.delete(i.prod_id));
+    } else {
+      items.forEach((i) => next.add(i.prod_id));
+    }
+
     setSelected(next);
   };
 
@@ -198,6 +210,29 @@ export default function InventoryPage() {
     }
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }, [page, totalPagesSafe]);
+
+  const handleOpenSellModal = () => {
+    const selectedItems = items.filter(i => selected.has(i.prod_id));
+
+    const noBalanceItems = selectedItems.filter(
+      i => i.balance_weight == null || Number(i.balance_weight) <= 0
+    );
+
+    if (noBalanceItems.length > 0) {
+      const names = noBalanceItems
+        .map(i => `• ${i.prod_name}`)
+        .join("<br/>");
+
+      setSellError(
+        "ไม่สามารถขายสินค้าได้ เนื่องจากสินค้าต่อไปนี้ไม่มีน้ำหนักคงเหลือในคลัง:<br/>" +
+        names
+      );
+      return;
+    }
+
+    setSellError("");
+    setShowSellModal(true);
+  };
 
   return (
     <div className="inv-page">
@@ -235,12 +270,27 @@ export default function InventoryPage() {
           <button
             className="btn btn-pill"
             disabled={selected.size === 0}
-            onClick={() => setShowSellModal(true)}
+            onClick={handleOpenSellModal}
           >
             ขายสินค้า
           </button>
         </div>
       </div>
+      {sellError && (
+        <div
+          className="alert alert-warning alert-dismissible fade show mt-2"
+          role="alert"
+        >
+          <div dangerouslySetInnerHTML={{ __html: sellError }} />
+
+          <button
+            type="button"
+            className="btn-close"
+            aria-label="Close"
+            onClick={() => setSellError("")}
+          />
+        </div>
+      )}
 
       <div className="cs-card inv-card">
         <div className="inv-tools">
@@ -328,10 +378,6 @@ export default function InventoryPage() {
                         <input
                           type="checkbox"
                           className="form-check-input"
-                          disabled={
-                            it.balance_weight == null ||
-                            Number(it.balance_weight) <= 0
-                          }
                           checked={selected.has(it.prod_id)}
                           onChange={() => toggleSelect(it.prod_id)}
                         />
